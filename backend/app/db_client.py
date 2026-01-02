@@ -64,7 +64,8 @@ def list_all_databases() -> List[Dict[str, any]]:
                 'size_bytes': row[2],
                 'collation': row[3],
                 'connection_limit': row[4],
-                'status': 'ok'  # Will be enhanced with health checks later
+                'status': 'ok',  # Will be enhanced with health checks later
+                'table_count': 0  # Will be populated if needed
             })
 
         cursor.close()
