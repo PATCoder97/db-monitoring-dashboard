@@ -5,8 +5,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-from .routers import databases
+from .routers import databases, metrics
 from .models import HealthResponse
+from .scheduler import start_scheduler, stop_scheduler
 
 # Configure logging
 logging.basicConfig(
@@ -33,6 +34,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(databases.router)
+app.include_router(metrics.router)
 
 
 @app.get("/api/health", response_model=HealthResponse, tags=["health"])
@@ -44,6 +46,18 @@ async def health_check():
         Health status of the API
     """
     return HealthResponse(status="healthy", message="PostgreSQL Monitoring API is running")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Start background scheduler on application startup."""
+    start_scheduler()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Stop background scheduler on application shutdown."""
+    stop_scheduler()
 
 
 @app.get("/", tags=["root"])
